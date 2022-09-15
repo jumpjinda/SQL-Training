@@ -105,6 +105,7 @@ WHERE sales.order_date < members.join_date;
 -- 8. What is the total items and amount spent for each member before they became a member?
 SELECT
   sales.customer_id,
+  COUNT(sales.product_id) AS total_items,
   SUM(menu.price) total_price
 FROM sales
 JOIN members
@@ -143,8 +144,8 @@ SELECT
   DATE(members.join_date, '+6 days') AS valid_date, /* เอาไว้ show ในตารางเฉยๆ */
   DATE('2021-01-31') AS eomonth,
   SUM(CASE
-    WHEN menu.product_name = 'sushi' THEN 2 * 10 * menu.price
-    WHEN sales.order_date BETWEEN members.join_date AND DATE(members.join_date, '+6 days') THEN 2 * 10 * menu.price
+    WHEN menu.product_name = 'sushi' THEN menu.price * 20
+    WHEN sales.order_date BETWEEN members.join_date AND DATE(members.join_date, '+6 days') THEN menu.price * 20
     ELSE 10 * price
     END) AS point
 FROM sales
