@@ -22,8 +22,8 @@ SELECT
 	sales.customer_id,
 	sales.order_date,
 	menu.product_name,
-	DENSE_RANK() OVER(PARTITION BY sales.customer_id 
-										ORDER BY sales.order_date) AS rank
+	DENSE_RANK() OVER(PARTITION BY sales.customer_id
+					  ORDER BY sales.order_date) AS rank
 FROM sales
 JOIN menu
 	ON sales.product_id = menu.product_id
@@ -54,7 +54,7 @@ SELECT
 	menu.product_name,
 	COUNT(sales.product_id) AS total_order,
 	DENSE_RANK() OVER(PARTITION BY sales.customer_id
-					  				ORDER BY COUNT(sales.product_id) DESC) AS rank
+					  ORDER BY COUNT(sales.product_id) DESC) AS rank
 FROM sales
 JOIN menu
 	ON sales.product_id = menu.product_id
@@ -73,7 +73,7 @@ SELECT
 	members.join_date,
 	sales.product_id,
 	DENSE_RANK() OVER(PARTITION BY sales.customer_id
-										ORDER BY order_date) AS rank
+					  ORDER BY order_date) AS rank
 FROM sales
 JOIN members
 	ON sales.customer_id = members.customer_id
