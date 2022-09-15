@@ -1,7 +1,7 @@
 -- 1. What is the total amount each customer spent at the restaurant?
 SELECT
 	sales.customer_id,
-    SUM(menu.price) AS total_spent
+	SUM(menu.price) AS total_spent
 FROM sales
 JOIN menu
 	ON sales.product_id = menu.product_id
@@ -11,7 +11,7 @@ ORDER BY customer_id;
 -- 2. How many days has each customer visited the restaurant?
 SELECT
 	customer_id,
-    COUNT(DISTINCT(order_date)) AS total_visit
+	COUNT(DISTINCT(order_date)) AS total_visit
 FROM sales
 GROUP BY customer_id;
 
@@ -20,10 +20,10 @@ WITH first_day_cte AS
 (
 SELECT
 	sales.customer_id,
-  	sales.order_date,
-    menu.product_name,
-	DENSE_RANK() OVER(PARTITION BY sales.customer_id
-                      ORDER BY sales.order_date) AS rank
+	sales.order_date,
+	menu.product_name,
+	DENSE_RANK() OVER(PARTITION BY sales.customer_id 
+										ORDER BY sales.order_date) AS rank
 FROM sales
 JOIN menu
 	ON sales.product_id = menu.product_id
@@ -54,7 +54,7 @@ SELECT
 	menu.product_name,
 	COUNT(sales.product_id) AS total_order,
 	DENSE_RANK() OVER(PARTITION BY sales.customer_id
-					  ORDER BY COUNT(sales.product_id) DESC) AS rank
+					  				ORDER BY COUNT(sales.product_id) DESC) AS rank
 FROM sales
 JOIN menu
 	ON sales.product_id = menu.product_id
@@ -73,7 +73,7 @@ SELECT
 	members.join_date,
 	sales.product_id,
 	DENSE_RANK() OVER(PARTITION BY sales.customer_id
-						ORDER BY order_date) AS rank
+										ORDER BY order_date) AS rank
 FROM sales
 JOIN members
 	ON sales.customer_id = members.customer_id
@@ -84,7 +84,7 @@ SELECT
 	o.order_date,
 	o.product_id,
 	menu.product_name
-FROM order_date_rank_cte o
+FROM order_date_rank_cte AS o
 JOIN menu
 	ON o.product_id = menu.product_id
 WHERE rank = 1;
@@ -120,7 +120,7 @@ WITH price_point AS
 SELECT
 	*,
 	CASE
-		WHEN product_id = 1 THEN price * 20
+		WHEN product_name = 'sushi' THEN price * 20
 		ELSE price * 10
 		END AS point
 FROM menu
@@ -133,11 +133,14 @@ JOIN sales
 	ON price_point.product_id = sales.product_id
 GROUP BY sales.customer_id;
 
--- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+-- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi
+-- how many points do customer A and B have at the end of January?
+
+-- (This is short term answer of SQL / อันนี้แบบสั้นรวบตารางให้เหลือแค่ผลลัพธ์ที่แท้จริง)
 SELECT
 	sales.customer_id,
 	members.join_date,
-	DATE(members.join_date, '+6 days') AS valid_date,
+	DATE(members.join_date, '+6 days') AS valid_date, /* เอาไว้ show ในตารางเฉยๆ */
 	DATE('2021-01-31') AS eomonth,
 	SUM(CASE
 			WHEN menu.product_name = 'sushi' THEN 2 * 10 * menu.price
