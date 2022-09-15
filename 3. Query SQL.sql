@@ -65,8 +65,90 @@ FROM rank_order_cte
 WHERE rank = 1;
 
 -- 6. Which item was purchased first by the customer after they became a member?
+WITH order_date_rank_cte AS
+(
+SELECT
+	sales.customer_id,
+	sales.order_date,
+	members.join_date,
+	sales.product_id,
+	DENSE_RANK() OVER(PARTITION BY sales.customer_id
+						ORDER BY order_date) AS rank
+FROM sales
+JOIN members
+	ON sales.customer_id = members.customer_id
+WHERE sales.order_date >= members.join_date
+)
+SELECT
+	o.customer_id,
+	o.order_date,
+	o.product_id,
+	menu.product_name
+FROM order_date_rank_cte o
+JOIN menu
+	ON o.product_id = menu.product_id
+WHERE rank = 1;
 
 -- 7. Which item was purchased just before the customer became a member?
+SELECT
+	sales.customer_id,
+	sales.order_date,
+	members.join_date,
+	menu.product_name
+FROM sales
+JOIN members
+	ON sales.customer_id = members.customer_id
+JOIN menu
+	ON sales.product_id = menu.product_id
+WHERE sales.order_date < members.join_date;
+
 -- 8. What is the total items and amount spent for each member before they became a member?
+SELECT
+	sales.customer_id,
+	SUM(menu.price) total_price
+FROM sales
+JOIN members
+	ON sales.customer_id = members.customer_id
+JOIN menu
+	ON sales.product_id = menu.product_id
+WHERE sales.order_date < members.join_date
+GROUP BY sales.customer_id;
+
 -- 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+WITH price_point AS
+(
+SELECT
+	*,
+	CASE
+		WHEN product_id = 1 THEN price * 20
+		ELSE price * 10
+		END AS point
+FROM menu
+)
+SELECT
+	sales.customer_id,
+	SUM(price_point.point) AS total_point
+FROM price_point
+JOIN sales
+	ON price_point.product_id = sales.product_id
+GROUP BY sales.customer_id;
+
 -- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+SELECT
+	sales.customer_id,
+	members.join_date,
+	DATE(members.join_date, '+6 days') AS valid_date,
+	DATE('2021-01-31') AS eomonth,
+	SUM(CASE
+			WHEN menu.product_name = 'sushi' THEN 2 * 10 * menu.price
+			WHEN sales.order_date BETWEEN members.join_date AND DATE(members.join_date, '+6 days')
+				THEN 2 * 10 * menu.price
+			ELSE 10 * price
+			END) AS point
+FROM sales
+JOIN members
+	ON sales.customer_id = members.customer_id
+JOIN menu
+	ON sales.product_id = menu.product_id
+WHERE sales.order_date < eomonth
+GROUP BY sales.customer_id;
