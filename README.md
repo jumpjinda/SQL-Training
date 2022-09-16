@@ -64,3 +64,10 @@ Recreate the following table output using the available data:
 <p align="center">
 <img src="https://user-images.githubusercontent.com/22377237/190631289-ee8db040-d1fe-4ced-8dbd-312cc01f8ced.png" width=50% height=50%>
 </p>
+
+### Rank All The Things
+Danny also requires further information about the *ranking* of customer products, but he purposely does not need the ranking for non-member purchases so he expects null *ranking* values for the records when customers are not yet part of the loyalty program.
+
+<p align="center">
+<img src="https://user-images.githubusercontent.com/22377237/190632029-1bca6972-ef16-4c79-8291-00a0040a3340.png" width=50% height=50%>
+</p>
