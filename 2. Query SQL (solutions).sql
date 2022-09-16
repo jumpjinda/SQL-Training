@@ -1,4 +1,5 @@
 -- 1. What is the total amount each customer spent at the restaurant?
+
 SELECT
   sales.customer_id,
   SUM(menu.price) AS total_spent
@@ -9,6 +10,7 @@ GROUP BY customer_id
 ORDER BY customer_id;
 
 -- 2. How many days has each customer visited the restaurant?
+
 SELECT
   customer_id,
   COUNT(DISTINCT(order_date)) AS total_visit
@@ -16,6 +18,7 @@ FROM sales
 GROUP BY customer_id;
 
 -- 3. What was the first item from the menu purchased by each customer?
+
 WITH first_day_cte AS
 (
 SELECT
@@ -35,6 +38,7 @@ WHERE rank = 1
 GROUP BY customer_id;
 
 -- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
+
 SELECT
   menu.product_name,
   COUNT(sales.product_id) AS most_purchased_item
@@ -46,6 +50,7 @@ ORDER BY most_purchased_item DESC
 LIMIT 1;
 
 -- 5. Which item was the most popular for each customer?
+
 WITH rank_order_cte AS
 (
 SELECT
@@ -66,6 +71,7 @@ FROM rank_order_cte
 WHERE rank = 1;
 
 -- 6. Which item was purchased first by the customer after they became a member?
+
 WITH order_date_rank_cte AS
 (
 SELECT
@@ -90,6 +96,7 @@ JOIN menu
 WHERE rank = 1;
 
 -- 7. Which item was purchased just before the customer became a member?
+
 SELECT
   sales.customer_id,
   sales.order_date,
@@ -103,6 +110,7 @@ JOIN menu
 WHERE sales.order_date < members.join_date;
 
 -- 8. What is the total items and amount spent for each member before they became a member?
+
 SELECT
   sales.customer_id,
   COUNT(sales.product_id) AS total_items,
@@ -116,6 +124,7 @@ WHERE sales.order_date < members.join_date
 GROUP BY sales.customer_id;
 
 -- 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+
 WITH price_point AS
 (
 SELECT
@@ -138,6 +147,7 @@ GROUP BY sales.customer_id;
 -- how many points do customer A and B have at the end of January?
 
 -- (This is short term answer of SQL / อันนี้แบบสั้นรวบตารางให้เหลือแค่ผลลัพธ์ที่แท้จริง)
+
 SELECT
   sales.customer_id,
   members.join_date,
@@ -156,7 +166,31 @@ JOIN menu
 WHERE sales.order_date < eomonth
 GROUP BY sales.customer_id;
 
-# Join All The Things
+-- Bonus Questions
+-- 1. Join All The Things
+
+SELECT
+  sales.customer_id,
+  sales.order_date,
+  menu.product_name,
+  menu.price,
+  CASE
+    WHEN sales.order_date >= members.join_date THEN "Y"
+	WHEN sales.order_date < members.join_date THEN "N"
+	ELSE "N"
+	END AS member
+FROM sales
+LEFT JOIN menu /*ใช้ LEFT JOIN เผื่อเอา sales.customer ออกมาทั้งหมด*/
+  ON sales.product_id = menu.product_id
+LEFT JOIN members
+  ON sales.customer_id = members.customer_id
+  
+-- 2. Rank All The Things
+-- Danny also requires further information about the ranking of customer products, but he purposely does not need the ranking for non-member purchases
+-- so he expects null ranking values for the records when customers are not yet part of the loyalty program.
+
+WITH members_by_date_cte AS
+(
 SELECT
   sales.customer_id,
   sales.order_date,
@@ -172,3 +206,12 @@ LEFT JOIN menu
   ON sales.product_id = menu.product_id
 LEFT JOIN members
   ON sales.customer_id = members.customer_id
+)
+SELECT 
+  *,
+  CASE
+    WHEN member = 'N' THEN NULL
+	ELSE
+	  DENSE_RANK() OVER(PARTITION BY customer_id, member ORDER BY order_date)
+	END AS ranking
+FROM members_by_date_cte
