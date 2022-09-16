@@ -176,9 +176,9 @@ SELECT
   menu.price,
   CASE
     WHEN sales.order_date >= members.join_date THEN "Y"
-	WHEN sales.order_date < members.join_date THEN "N"
-	ELSE "N"
-	END AS member
+    WHEN sales.order_date < members.join_date THEN "N"
+    ELSE "N"
+    END AS member
 FROM sales
 LEFT JOIN menu /*ใช้ LEFT JOIN เผื่อเอา sales.customer ออกมาทั้งหมด*/
   ON sales.product_id = menu.product_id
