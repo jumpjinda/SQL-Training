@@ -198,9 +198,9 @@ SELECT
   menu.price,
   CASE
     WHEN sales.order_date >= members.join_date THEN "Y"
-	WHEN sales.order_date < members.join_date THEN "N"
-	ELSE "N"
-	END AS member
+    WHEN sales.order_date < members.join_date THEN "N"
+    ELSE "N"
+    END AS member
 FROM sales
 LEFT JOIN menu
   ON sales.product_id = menu.product_id
@@ -211,7 +211,7 @@ SELECT
   *,
   CASE
     WHEN member = 'N' THEN NULL
-	ELSE
-	  DENSE_RANK() OVER(PARTITION BY customer_id, member ORDER BY order_date)
-	END AS ranking
+    ELSE
+      DENSE_RANK() OVER(PARTITION BY customer_id, member ORDER BY order_date)
+    END AS ranking
 FROM members_by_date_cte
