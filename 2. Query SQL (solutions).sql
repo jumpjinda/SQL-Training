@@ -155,3 +155,20 @@ JOIN menu
   ON sales.product_id = menu.product_id
 WHERE sales.order_date < eomonth
 GROUP BY sales.customer_id;
+
+# Join All The Things
+SELECT
+  sales.customer_id,
+  sales.order_date,
+  menu.product_name,
+  menu.price,
+  CASE
+    WHEN sales.order_date >= members.join_date THEN "Y"
+	WHEN sales.order_date < members.join_date THEN "N"
+	ELSE "N"
+	END AS member
+FROM sales
+LEFT JOIN menu
+  ON sales.product_id = menu.product_id
+LEFT JOIN members
+  ON sales.customer_id = members.customer_id
