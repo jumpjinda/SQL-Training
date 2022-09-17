@@ -7,6 +7,7 @@ resource : https://8weeksqlchallenge.com/case-study-1/
 <p align="center">
 Danny Ma · May 1, 2021
 </p>
+
 <p align="center">
 <img src="https://user-images.githubusercontent.com/22377237/189731067-b4cd2079-da4b-4193-882f-f00a028eede0.png" width=50% height=50%>
 </p>
